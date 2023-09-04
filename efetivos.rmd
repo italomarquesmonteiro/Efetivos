@@ -1,0 +1,214 @@
+---
+title: ""
+description: ""
+author: 
+    - name: "Ítalo Marques-Monteiro"
+    - email: "italo.marques.monteiro@outlook.com"
+date: "02 set 2023"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+15*60
+6*5
+```
+
+```{r}
+reb <- sidrar::get_sidra(
+    api = "/t/3939/n6/all/v/all/p/last%201/c79/2670,2672,2675,2677,2680,2681,32793,32794") |>
+    janitor::clean_names("snake") |>
+    dplyr::glimpse()
+```
+
+```{r}
+reb <- reb |> 
+    dplyr::select(
+        valor, municipio_codigo, tipo_de_rebanho,
+        code_muni = municipio_codigo
+    ) |>
+    dplyr::glimpse()
+```
+
+```{r}
+reb <- reb |> 
+    dplyr::mutate(code_muni = as.double(code_muni)) |>
+    dplyr::glimpse()
+```
+
+```{r}
+muni <- geobr::read_municipality(code_muni = "all", year = 2020)
+muni |> dplyr::glimpse()
+```
+
+```{r}
+rebanho <- muni |>
+    dplyr::left_join(reb) |>
+    dplyr::glimpse()
+```
+
+```{r}
+scaleFUN <- function(x) format(round(as.numeric(x), 0), nsmall= 0, big.mark = ",")
+
+# Create line chart theme
+theme_swd_line <-   theme(
+  plot.title = element_text(size = rel(1.75), color = "steelblue"), 
+  plot.margin = margin(20, 20, 20, 20),
+  text = element_text(family = "Roboto", color = "#979797"),
+  axis.title.x = element_text(hjust = 0, vjust = -0.5),
+  axis.title.y = element_blank(),
+  axis.text.y = element_blank(),
+  line = element_blank(),
+  rect = element_blank()
+)
+```
+
+
+```{r}
+bovi <- rebanho |> 
+    dplyr::filter(
+        abbrev_state == "RS" & 
+            tipo_de_rebanho == "Bovino"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme(legend.position = c(0.2, 0.2),
+            panel.grid.major = element_line(colour = "gray95"),
+            panel.background = element_rect(fill = "gray95"),
+            legend.background = element_rect(
+            fill = "grey95", colour = "gray95", size = 1)) +
+        labs(
+            fill = "Número\n[milhares de cabeça]",
+            x = "Longitude",
+            y = "Latitude") +
+        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
+            label = "Efetivo Bovino - RS") +
+        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
+            label = "Pesquisa pecuária municipal (2021)") +
+        annotate("text", x = -51, y = -33,
+            label = "Source: IBGE [open data(2023)]
+            by Ítalo Monteiro" , color = "gray50") 
+bovi
+```
+
+```{r}
+ggsave(
+    "C:/Users/italo/OneDrive/Área de Trabalho/GitHub/efetivo_rebanho/Image/map_bovi.png"),
+    plot = bovi,
+    dpi = 300,
+    height =,
+    weight = 
+```
+
+
+```{r}
+rebanho |> 
+    dplyr::filter(
+        abbrev_state == "RS" & 
+            tipo_de_rebanho == "Equino"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme(legend.position = c(0.2, 0.2),
+            panel.grid.major = element_line(colour = "gray95"),
+            panel.background = element_rect(fill = "gray95"),
+            legend.background = element_rect(
+            fill = "grey95", colour = "gray95", size = 1)) +
+        labs(
+            fill = "Número [mil]",
+            x = "Longitude",
+            y = "Latitude") +
+        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
+            label = "Efetivo Equino - RS") +
+        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
+            label = "Pesquisa pecuária municipal (2021)") +
+        annotate("text", x = -51, y = -33,
+            label = "Source: IBGE [open data(2023)]
+            by Ítalo Monteiro" , color = "gray50")
+```
+
+
+```{r}
+rebanho |> 
+    dplyr::filter(
+        abbrev_state == "RS" & 
+            tipo_de_rebanho == "Ovino"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme(legend.position = c(0.2, 0.2),
+            panel.grid.major = element_line(colour = "gray95"),
+            panel.background = element_rect(fill = "gray95"),
+            legend.background = element_rect(
+            fill = "grey95", colour = "gray95", size = 1)) +
+        labs(
+            fill = "Número [mil]",
+            x = "Longitude",
+            y = "Latitude") +
+        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
+            label = "Efetivo Ovino - RS") +
+        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
+            label = "Pesquisa pecuária municipal (2021)") +
+        annotate("text", x = -51, y = -33,
+            label = "Source: IBGE [open data(2023)]
+            by Ítalo Monteiro" , color = "gray50")
+```
+
+
+
+```{r}
+rebanho |> 
+    dplyr::filter(
+        abbrev_state == "RS" & 
+            tipo_de_rebanho == "Suíno - total"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme(legend.position = c(0.2, 0.2),
+            panel.grid.major = element_line(colour = "gray95"),
+            panel.background = element_rect(fill = "gray95"),
+            legend.background = element_rect(
+            fill = "grey95", colour = "gray95", size = 1)) +
+        labs(
+            fill = "Número [mil]",
+            x = "Longitude",
+            y = "Latitude") +
+        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
+            label = "Efetivo Suino - RS") +
+        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
+            label = "Pesquisa pecuária municipal (2021)") +
+        annotate("text", x = -51, y = -33,
+            label = "Source: IBGE [open data(2023)]
+            by Ítalo Monteiro" , color = "gray50")
+```
+
+```{r}
+rebanho |> 
+    dplyr::filter(
+        abbrev_state == "RS" & 
+            tipo_de_rebanho == "Galináceos - galinhas"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme(legend.position = c(0.2, 0.2),
+            panel.grid.major = element_line(colour = "gray95"),
+            panel.background = element_rect(fill = "gray95"),
+            legend.background = element_rect(
+            fill = "grey95", colour = "gray95", size = 1)) +
+        labs(
+            fill = "Número [mil]",
+            x = "Longitude",
+            y = "Latitude") +
+        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
+            label = "Efetivo Galinhas - RS") +
+        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
+            label = "Pesquisa pecuária municipal (2021)") +
+        annotate("text", x = -51, y = -33,
+            label = "Source: IBGE [open data(2023)]
+            by Ítalo Monteiro" , color = "gray50")
+```
