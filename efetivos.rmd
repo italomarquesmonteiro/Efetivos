@@ -10,8 +10,6 @@ output: html_document
 
 ```{r}
 library(tidyverse)
-15*60
-6*5
 ```
 
 ```{r}
@@ -64,48 +62,51 @@ theme_swd_line <-   theme(
 ```
 
 
+
 ```{r}
-bovi <- rebanho |> 
+bovi <- rebanho |>
     dplyr::filter(
-        abbrev_state == "RS" & 
+        abbrev_state == "RS" &
             tipo_de_rebanho == "Bovino"
-            ) |>
+            ) |> #dplyr::arrange(desc(valor))
     ggplot2::ggplot() +
         geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
     viridis::scale_fill_viridis(discrete = FALSE) +
+        theme_void() +
         theme(legend.position = c(0.2, 0.2),
-            panel.grid.major = element_line(colour = "gray95"),
-            panel.background = element_rect(fill = "gray95"),
+            panel.grid.major = element_line(colour = "white"),
+            panel.background = element_rect(fill = "white"),
             legend.background = element_rect(
-            fill = "grey95", colour = "gray95", size = 1)) +
+            fill = "white", colour = "white", size = 1)) +
         labs(
             fill = "Número\n[milhares de cabeça]",
             x = "Longitude",
             y = "Latitude") +
-        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Bovino - RS") +
+        annotate("text", x = -56, y = -27, color = "gray30", size = 10,
+            label = "Efetivo Bovino") +
         annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
             label = "Pesquisa pecuária municipal (2021)") +
         annotate("text", x = -51, y = -33,
-            label = "Source: IBGE [open data(2023)]
+            label = "Fonte: IBGE (2023)]
             by Ítalo Monteiro" , color = "gray50") 
 bovi
 ```
 
+
 ```{r}
 ggsave(
-    "C:/Users/italo/OneDrive/Área de Trabalho/GitHub/efetivo_rebanho/Image/map_bovi.png"),
+    "Image/map_bovi.png",
     plot = bovi,
-    dpi = 300,
+    dpi = 600),
     height =,
     weight = 
 ```
 
 
 ```{r}
-rebanho |> 
+rebanho |>
     dplyr::filter(
-        abbrev_state == "RS" & 
+        abbrev_state == "RS" &
             tipo_de_rebanho == "Equino"
             ) |>
     ggplot2::ggplot() +
@@ -121,11 +122,11 @@ rebanho |>
             x = "Longitude",
             y = "Latitude") +
         annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Equino - RS") +
+            label = "Efetivo Equino") +
         annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
             label = "Pesquisa pecuária municipal (2021)") +
         annotate("text", x = -51, y = -33,
-            label = "Source: IBGE [open data(2023)]
+            label = "Fonte: IBGE (2023)
             by Ítalo Monteiro" , color = "gray50")
 ```
 
@@ -149,11 +150,11 @@ rebanho |>
             x = "Longitude",
             y = "Latitude") +
         annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Ovino - RS") +
+            label = "Efetivo Ovino") +
         annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
             label = "Pesquisa pecuária municipal (2021)") +
         annotate("text", x = -51, y = -33,
-            label = "Source: IBGE [open data(2023)]
+            label = "Source: IBGE (2023)
             by Ítalo Monteiro" , color = "gray50")
 ```
 
