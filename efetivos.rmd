@@ -29,14 +29,16 @@ reb <- reb |>
 ```
 
 ```{r}
-reb <- reb |> 
+reb <- reb |>
     dplyr::mutate(code_muni = as.double(code_muni)) |>
     dplyr::glimpse()
 ```
 
 ```{r}
 muni <- geobr::read_municipality(code_muni = "all", year = 2020)
-muni |> dplyr::glimpse()
+muni |> 
+    #dplyr::count(name_muni)
+    dplyr::glimpse()
 ```
 
 ```{r}
@@ -64,7 +66,7 @@ theme_swd_line <-   theme(
 
 
 ```{r}
-bovi <- rebanho |>
+bovinos <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
             tipo_de_rebanho == "Bovino"
@@ -73,143 +75,290 @@ bovi <- rebanho |>
         geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
     viridis::scale_fill_viridis(discrete = FALSE) +
         theme_void() +
-        theme(legend.position = c(0.2, 0.2),
-            panel.grid.major = element_line(colour = "white"),
-            panel.background = element_rect(fill = "white"),
-            legend.background = element_rect(
-            fill = "white", colour = "white", size = 1)) +
         labs(
-            fill = "Número\n[milhares de cabeça]",
-            x = "Longitude",
-            y = "Latitude") +
-        annotate("text", x = -56, y = -27, color = "gray30", size = 10,
-            label = "Efetivo Bovino") +
-        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
-            label = "Pesquisa pecuária municipal (2021)") +
-        annotate("text", x = -51, y = -33,
-            label = "Fonte: IBGE (2023)]
-            by Ítalo Monteiro" , color = "gray50") 
-bovi
+            title = "Efetivo bovino do Rio Grande do Sul",
+            subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+bovinos
 ```
 
 
 ```{r}
-ggsave(
-    "Image/map_bovi.png",
-    plot = bovi,
-    dpi = 600),
-    height =,
-    weight = 
+ggsave("Image/bovinos.png", plot = bovinos, dpi = 600)
 ```
 
-
+equinos
 ```{r}
-rebanho |>
+equinos <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
             tipo_de_rebanho == "Equino"
             ) |>
     ggplot2::ggplot() +
-        geom_sf(aes(fill = valor, na.rm = TRUE)) +
+        geom_sf(aes(fill = valor/1000, na.rm = TRUE)) +
     viridis::scale_fill_viridis(discrete = FALSE) +
-        theme(legend.position = c(0.2, 0.2),
-            panel.grid.major = element_line(colour = "gray95"),
-            panel.background = element_rect(fill = "gray95"),
-            legend.background = element_rect(
-            fill = "grey95", colour = "gray95", size = 1)) +
+        theme_void() +
         labs(
-            fill = "Número [mil]",
-            x = "Longitude",
-            y = "Latitude") +
-        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Equino") +
-        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
-            label = "Pesquisa pecuária municipal (2021)") +
-        annotate("text", x = -51, y = -33,
-            label = "Fonte: IBGE (2023)
-            by Ítalo Monteiro" , color = "gray50")
+            title = "Efetivo equino do Rio Grande do Sul",
+            subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+equinos
 ```
 
-
 ```{r}
-rebanho |> 
+ggsave("Image/equinos.png", plot = equinos, dpi = 600)
+```
+
+ovinos
+```{r}
+ovinos <- rebanho |> 
     dplyr::filter(
-        abbrev_state == "RS" & 
+        abbrev_state == "RS" &
             tipo_de_rebanho == "Ovino"
             ) |>
     ggplot2::ggplot() +
         geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
     viridis::scale_fill_viridis(discrete = FALSE) +
-        theme(legend.position = c(0.2, 0.2),
-            panel.grid.major = element_line(colour = "gray95"),
-            panel.background = element_rect(fill = "gray95"),
-            legend.background = element_rect(
-            fill = "grey95", colour = "gray95", size = 1)) +
+       theme_void() +
         labs(
-            fill = "Número [mil]",
-            x = "Longitude",
-            y = "Latitude") +
-        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Ovino") +
-        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
-            label = "Pesquisa pecuária municipal (2021)") +
-        annotate("text", x = -51, y = -33,
-            label = "Source: IBGE (2023)
-            by Ítalo Monteiro" , color = "gray50")
+            title = "Efetivo ovino do Rio Grande do Sul",
+           subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeça]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+ovinos       
+```
+
+```{r}
+ggsave("Image/ovinos.png", plot = ovinos, dpi = 600)
 ```
 
 
-
+suinos
 ```{r}
-rebanho |> 
+suinos <- rebanho |> 
     dplyr::filter(
-        abbrev_state == "RS" & 
+        abbrev_state == "RS" &
             tipo_de_rebanho == "Suíno - total"
             ) |>
     ggplot2::ggplot() +
         geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
     viridis::scale_fill_viridis(discrete = FALSE) +
-        theme(legend.position = c(0.2, 0.2),
-            panel.grid.major = element_line(colour = "gray95"),
-            panel.background = element_rect(fill = "gray95"),
-            legend.background = element_rect(
-            fill = "grey95", colour = "gray95", size = 1)) +
+        theme_void() +
         labs(
-            fill = "Número [mil]",
-            x = "Longitude",
-            y = "Latitude") +
-        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Suino - RS") +
-        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
-            label = "Pesquisa pecuária municipal (2021)") +
-        annotate("text", x = -51, y = -33,
-            label = "Source: IBGE [open data(2023)]
-            by Ítalo Monteiro" , color = "gray50")
+            title = "Efetivo suíno do Rio Grande do Sul",
+           subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+suinos
 ```
 
 ```{r}
-rebanho |> 
+ggsave("Image/suinos.png", plot = suinos, dpi = 600)
+```
+
+
+galinhas
+```{r}
+galinhas <- rebanho |> 
     dplyr::filter(
-        abbrev_state == "RS" & 
+        abbrev_state == "RS" &
             tipo_de_rebanho == "Galináceos - galinhas"
             ) |>
     ggplot2::ggplot() +
         geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
     viridis::scale_fill_viridis(discrete = FALSE) +
-        theme(legend.position = c(0.2, 0.2),
-            panel.grid.major = element_line(colour = "gray95"),
-            panel.background = element_rect(fill = "gray95"),
-            legend.background = element_rect(
-            fill = "grey95", colour = "gray95", size = 1)) +
+        theme_void() +
         labs(
-            fill = "Número [mil]",
-            x = "Longitude",
-            y = "Latitude") +
-        annotate("text", x = -56, y = -27, color = "gray30", size = 8,
-            label = "Efetivo Galinhas - RS") +
-        annotate("text", x = -50.8, y = -32.5, color = "gray40", size = 4,
-            label = "Pesquisa pecuária municipal (2021)") +
-        annotate("text", x = -51, y = -33,
-            label = "Source: IBGE [open data(2023)]
-            by Ítalo Monteiro" , color = "gray50")
+            title = "Efetivo galináceos - galinhas do Rio Grande do Sul",
+           subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+galinhas
+```
+
+```{r}
+ggsave("Image/galinhas.png", plot = galinhas, dpi = 600)
+```
+
+bubalino
+```{r}
+bubalino <- rebanho |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Bubalino"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme_void() +
+        labs(
+            title = "Efetivo bubalino do Rio Grande do Sul",
+           subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+bubalino
+```
+
+```{r}
+ggsave("Image/bubalino.png", plot = bubalino, dpi = 600)
+```
+
+caprino
+```{r}
+caprino <- rebanho |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Caprino"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme_void() +
+        labs(
+            title = "Efetivo caprino do Rio Grande do Sul",
+           subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+caprino
+```
+
+```{r}
+ggsave("Image/caprino.png", plot = caprino, dpi = 600)
+```
+
+codornas
+```{r}
+codornas <- rebanho |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Codornas"
+            ) |>
+    ggplot2::ggplot() +
+        geom_sf(aes(fill = valor / 1000, na.rm = TRUE)) +
+    viridis::scale_fill_viridis(discrete = FALSE) +
+        theme_void() +
+        labs(
+            title = "Efetivo codornas do Rio Grande do Sul",
+           subtitle = "IBGE [Pesquisa pecuária municipal (2021) 2023] & geobr (2019) 
+            by Ítalo Monteiro ",
+        fill = "Número\n[mil cabeças]") +
+        theme(
+            plot.title = element_text(
+                face = "italic", size = 25, hjust = 0.1),
+            plot.subtitle = element_text(
+                family = "italic", size = 15, color = "gray50", hjust = 0.1),
+            plot.caption = element_text(
+                face = "italic", size = 12, color = "gray50"),
+            axis.text.y = element_blank(),
+            #axis.text.y = element_text(
+                #size = 14, hjust = 1, family = "Fira Sans"),
+            plot.margin = margin(rep(15, 4)),
+            panel.background = element_blank(),
+            plot.background = element_blank()
+        )
+codornas
+```
+
+```{r}
+ggsave("Image/codornas.png", plot = codornas, dpi = 600)
 ```
