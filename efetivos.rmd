@@ -20,7 +20,7 @@ reb <- sidrar::get_sidra(
 ```
 
 ```{r}
-reb <- reb |> 
+reb <- reb |>
     dplyr::select(
         valor, municipio_codigo, tipo_de_rebanho,
         code_muni = municipio_codigo
@@ -48,19 +48,42 @@ rebanho <- muni |>
 ```
 
 ```{r}
-scaleFUN <- function(x) format(round(as.numeric(x), 0), nsmall= 0, big.mark = ",")
-
-# Create line chart theme
-theme_swd_line <-   theme(
-  plot.title = element_text(size = rel(1.75), color = "steelblue"), 
-  plot.margin = margin(20, 20, 20, 20),
-  text = element_text(family = "Roboto", color = "#979797"),
-  axis.title.x = element_text(hjust = 0, vjust = -0.5),
-  axis.title.y = element_blank(),
-  axis.text.y = element_blank(),
-  line = element_blank(),
-  rect = element_blank()
+rank_table_bovino <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Alegrete",	524.005,
+    "Sant'ana Do Livramento",	498.789,
+    "Uruguaiana",	324.526
 )
+
+rank_table_bovino <- rebanho |>
+    dplyr::filter(
+        abbrev_state == "RS",
+            tipo_de_rebanho == "Bovino",
+                valor > 310000
+    ) |>
+
+    dplyr::arrange(desc(valor))
+
+cond_table_bovino <- formattable::formattable(rank_table_bovino,
+                          col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                           list(efetivo = formattable::color_tile(
+                              "#5DC863FF", "#FDE725FF")),
+                                align = c("c", "c")
+)
+formattable::as.htmlwidget(cond_table_bovino, width = 400)
+
+#install.packages("webshot")
+webshot::webshot(url = "Downloads", file = "rank_table_bovino.png",
+                 vwidth = 400, vheight = 275)
+```
+
+```{r}
+rebanho |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Bovino"
+    ) |>
+    dplyr::arrange(desc(valor))
 ```
 
 
