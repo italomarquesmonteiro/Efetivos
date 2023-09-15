@@ -22,9 +22,10 @@ reb <- sidrar::get_sidra(
 ```{r}
 reb <- reb |>
     dplyr::select(
-        valor, municipio_codigo, tipo_de_rebanho,
-        code_muni = municipio_codigo
-    ) |>
+        municipio_codigo, municipio, tipo_de_rebanho, valor) |>
+    tidyr::separate(
+        col = municipio, into = c(
+            "municipio", "abbrev_state"), sep = " - ") |>
     dplyr::glimpse()
 ```
 
@@ -34,61 +35,55 @@ reb <- reb |>
     dplyr::glimpse()
 ```
 
+
+dados espaciais 
 ```{r}
 muni <- geobr::read_municipality(code_muni = "all", year = 2020)
-muni |> 
-    #dplyr::count(name_muni)
-    dplyr::glimpse()
+muni |> dplyr::glimpse()
 ```
 
 ```{r}
 rebanho <- muni |>
     dplyr::left_join(reb) |>
-    dplyr::glimpse()
+    dplyr::glimpse() 
+rebanho |> tibble::view()
 ```
 
+
+tabela-ranking e mapa de bovinos
 ```{r}
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Bovino" & valor > 153000
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
 rank_table_bovino <- tibble::tribble(
     ~cidade,	~efetivo,
     "Alegrete",	524.005,
     "Sant'ana Do Livramento",	498.789,
-    "Uruguaiana",	324.526
-)
-
-rank_table_bovino <- rebanho |>
-    dplyr::filter(
-        abbrev_state == "RS",
-            tipo_de_rebanho == "Bovino",
-                valor > 310000
-    ) |>
-
-    dplyr::arrange(desc(valor))
+    "Uruguaiana",	324.526,
+    "Dom Pedrito", 309.119,
+    "Rosário Do Sul", 263.967,
+    "São Gabriel", 254.901,
+    "Quaraí", 240.329,
+    "Bagé", 223.060,
+    "Lavras Do Sul", 168.201,
+    "Santiago", 163.484)
 
 cond_table_bovino <- formattable::formattable(rank_table_bovino,
-                          col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
-                           list(efetivo = formattable::color_tile(
-                              "#5DC863FF", "#FDE725FF")),
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
                                 align = c("c", "c")
-)
+    )
 formattable::as.htmlwidget(cond_table_bovino, width = 400)
 
-#install.packages("webshot")
-webshot::webshot(url = "Downloads", file = "rank_table_bovino.png",
-                 vwidth = 400, vheight = 275)
-```
 
-```{r}
-rebanho |>
-    dplyr::filter(
-        abbrev_state == "RS" &
-            tipo_de_rebanho == "Bovino"
-    ) |>
-    dplyr::arrange(desc(valor))
-```
-
-
-
-```{r}
 bovinos <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
@@ -120,13 +115,46 @@ bovinos <- rebanho |>
 bovinos
 ```
 
-
 ```{r}
 ggsave("Image/bovinos.png", plot = bovinos, dpi = 600)
 ```
 
-equinos
+
+tabela-ranking e mapa de equinos
 ```{r}
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Equino" & valor > 7300
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_equino <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Sant'Ana do Livramento", 25.341,
+    "Uruguaiana", 21.699,
+    "Alegrete", 21.207,
+    "Dom Pedrito", 15.128,
+    "Bagé", 14.719,
+    "São Gabriel", 11.795,
+    "Quaraí", 11.492,
+    "Rosário do Sul", 11.210,
+    "Lavras do Sul",  8.923,
+    "Aceguá",  7.374
+)
+
+cond_table_equino <- formattable::formattable(rank_table_equino,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_equino, width = 400)
+
+
 equinos <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
@@ -162,9 +190,41 @@ equinos
 ggsave("Image/equinos.png", plot = equinos, dpi = 600)
 ```
 
-ovinos
+tabela-ranking e mapa de ovinos
 ```{r}
-ovinos <- rebanho |> 
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Ovino" & valor > 80000
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_ovino <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Sant'Ana do Livramento", 300.026,
+    "Alegrete", 193.700,
+    "Quaraí", 155.502,
+    "Uruguaiana", 149.164,
+    "Rosário do Sul", 112.332,
+    "Pinheiro Machado", 111.366,
+    "Dom Pedrito",  97.822,
+    "Bagé",  91.899,
+    "Piratini",  83.226,
+    "São Gabriel",  82.379
+)
+
+cond_table_ovino <- formattable::formattable(rank_table_ovino,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_ovino, width = 400)
+
+ovinos <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
             tipo_de_rebanho == "Ovino"
@@ -200,8 +260,40 @@ ggsave("Image/ovinos.png", plot = ovinos, dpi = 600)
 ```
 
 
-suinos
+tabela-ranking e mapa de suinos
 ```{r}
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Suíno - total" & valor > 80000
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_suino <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Santo Cristo", 154.411,
+    "Frederico Westphalen", 121.592,
+    "Palmitinho", 119.331,
+    "Aratiba", 115.648,
+    "Três Passos", 107.032,
+    "Rodeio Bonito",  99.529,
+    "Teutônia",  90.840,
+    "Pinhal",  90.000,
+    "Pinheirinho do Vale",  88.931,
+    "Estrela",  82.000
+)
+
+cond_table_suino <- formattable::formattable(rank_table_suino,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_suino, width = 400)
+
 suinos <- rebanho |> 
     dplyr::filter(
         abbrev_state == "RS" &
@@ -238,9 +330,41 @@ ggsave("Image/suinos.png", plot = suinos, dpi = 600)
 ```
 
 
-galinhas
+tabela-ranking e mapa de galinhas
 ```{r}
-galinhas <- rebanho |> 
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Galináceos - galinhas" & valor > 386000
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_galinha <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Farroupilha", 942.953,
+    "Salvador do Sul", 861.161,
+    "Alto Feliz", 635.676,
+    "Morro Reuter", 617.178,
+    "Flores da Cunha", 605.388,
+    "Vacaria", 570.350,
+    "Taquari", 553.000,
+    "Fazenda Vilanova", 425.000,
+    "Garibaldi", 397.349,
+    "Vila Maria", 386.705
+)
+
+cond_table_galinha <- formattable::formattable(rank_table_galinha,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_galinha, width = 400)
+
+galinhas <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
             tipo_de_rebanho == "Galináceos - galinhas"
@@ -275,8 +399,40 @@ galinhas
 ggsave("Image/galinhas.png", plot = galinhas, dpi = 600)
 ```
 
-bubalino
+tabela-ranking e mapa de bubalino
 ```{r}
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Bubalino" & valor > 1029
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_bubalino <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Uruguaiana", 2.554,
+    "Alegrete", 2.502,
+    "São Gabriel", 1.699,
+    "Pedras Altas", 1.404,
+    "Taquara", 1.400,
+    "São Nicolau", 1.392,
+    "Rio Grande", 1.220,
+    "Passo do Sobrado", 1.120,
+    "Guaíba", 1.056,
+    "General Câmara", 1.030
+)
+
+cond_table_bubalino <- formattable::formattable(rank_table_bubalino,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_bubalino, width = 400)
+
 bubalino <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
@@ -312,8 +468,40 @@ bubalino
 ggsave("Image/bubalino.png", plot = bubalino, dpi = 600)
 ```
 
-caprino
+tabela-ranking e mapa de caprino
 ```{r}
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Caprino" & valor > 1029
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_caprino <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Bagé", 6.342,
+    "Santana da Boa Vista", 5.959,
+    "Caçapava do Sul", 3.915,
+    "Canguçu", 2.277,
+    "Lavras do Sul", 1.939,
+    "Pinheiro Machado", 1.780,
+    "Barão do Triunfo", 1.500,
+    "Piratini", 1.493,
+    "Cachoeira do Sul", 1.050,
+    "Gravataí", 1.040
+)
+
+cond_table_caprino <- formattable::formattable(rank_table_caprino,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_caprino, width = 400)
+
 caprino <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
@@ -349,8 +537,40 @@ caprino
 ggsave("Image/caprino.png", plot = caprino, dpi = 600)
 ```
 
-codornas
+tabela-ranking e mapa de codornas
 ```{r}
+reb |>
+    dplyr::filter(
+        abbrev_state == "RS" &
+            tipo_de_rebanho == "Codornas" & valor > 17000
+    ) |>
+    dplyr::mutate(cab = valor / 1000) |>
+    dplyr::select(municipio, cab) |>
+    dplyr::arrange(desc(cab))
+
+
+rank_table_codornas <- tibble::tribble(
+    ~cidade,	~efetivo,
+    "Farroupilha", 113.000,
+    "Fazenda Vilanova",  80.000,
+    "General Câmara",  60.000,
+    "Alto Feliz",  58.608,
+    "Lajeado",  52.330,
+    "Sapiranga",  47.000,
+    "Gaurama",  38.000,
+    "Santa Clara do Sul",  22.000,
+    "Paverama",  20.000,
+    "Dois Irmãos",  18.000
+)
+
+cond_table_codornas <- formattable::formattable(rank_table_codornas,
+                    col.names = c("Cidade - Ranking", "Efetivo (mil cabeças)"),
+                        list(efetivo = formattable::color_tile(
+                            "#1f9e89", "#fde725")),
+                                align = c("c", "c")
+    )
+formattable::as.htmlwidget(cond_table_codornas, width = 400)
+
 codornas <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
