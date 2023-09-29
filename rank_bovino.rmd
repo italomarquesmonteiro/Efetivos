@@ -20,52 +20,69 @@ library(tidyverse)
 
 ```{r}
 reb <- sidrar::get_sidra(
-    api = "/t/3939/n3/all/u/y/v/all/p/last%207/c79/2670") |>
+    api = "/t/3939/n3/all/u/y/v/all/p/last%207/c79/all") |>
     janitor::clean_names("snake") |>
+    tibble::as_tibble() |>
+    dplyr::mutate(ano = as.double(ano)) |>
     dplyr::glimpse()
-reb <- tibble(reb)
 ```
 
 
 ```{r}
 reb <- reb |>
     dplyr::select(
-        ano, rebanho = valor, estados = unidade_da_federacao ) |>
+        ano, rebanho = valor,
+            estados = unidade_da_federacao,
+                tipo_de_rebanho
+                ) |>
     dplyr::glimpse()
 ```
 
+
+Rank Bovino
 ```{r}
-reb <- reb |>
-    dplyr::mutate(ano = as.double(ano)) |>
+reb_bovino <- reb |>
+    dplyr::filter(tipo_de_rebanho == "Bovino") |>
     dplyr::glimpse()
 
 
-test_reb <- reb |>
-    dplyr::summarise(rebanho = sum(rebanho, na.rm = TRUE), .by = c(ano, estados))
+test_reb <- reb_bovino |>
+    dplyr::summarise(
+        rebanho = sum(
+            rebanho, na.rm = TRUE), .by = c(
+                ano, estados))
 
 estados_rank_by_ano <- test_reb |>
     dplyr::mutate(rank = row_number(desc(rebanho)), .by = ano)
 
+max_rank <- 10
 
 todays_top <- estados_rank_by_ano |>
-    dplyr::filter(ano == 2022, rank <= max_rank) |> 
+    dplyr::filter(ano == 2022, rank <= max_rank) |>
     dplyr::pull(estados)
 
-estados_selecionados <- estados_rank_by_ano |> 
-    dplyr::filter(estados %in% todays_top) 
-```
+estados_selecionados <- estados_rank_by_ano |>
+    dplyr::filter(estados %in% todays_top)
 
-```{r}
 color_palette <- c(
-  "#CC79A7", "#D55E00", "#E69F00", "#999999","#0072B2", "#009E73"
-   #rondonia",    "#para   ", " minas ","#mato g. sul", "mato grosso", "goias"
-)
-names(color_palette) <- todays_top
-description_color <- 'grey30'
+    "mediumpurple1",
+    "darkred",
+    "coral2",
+    "deeppink",
+    "gray50",
+    "#0072B2",
+    "#009E73",
+    "goldenrod3",
+    "#fd001e",
+    "darkslategray"
+    )
 
-rank_rebanho <- estados_selecionados |> 
-  ggplot(aes(ano, rank, col = estados)) + 
-  geom_point(shape = '|', stroke = 9) +
+names(color_palette) <- todays_top
+description_color <- "grey30"
+
+rank_rebanho_bovino <- estados_selecionados |>
+  ggplot(aes(ano, rank, col = estados)) +
+  geom_point(shape = "|", stroke = 9) +
   ggbump::geom_bump(linewidth = 2) +
   geom_text(
     data = estados_selecionados |> filter(ano == 2016),
@@ -73,8 +90,8 @@ rank_rebanho <- estados_selecionados |>
     hjust = 1,
     nudge_x = -0.1,
     size = 8,
-    fontface = 'bold',
-    family = 'Source Sans Pro'
+    fontface = "bold",
+    family = "Source Sans Pro"
   ) +
   geom_text(
     data = estados_selecionados |> filter(ano == 2022),
@@ -82,41 +99,46 @@ rank_rebanho <- estados_selecionados |>
     hjust = 0,
     nudge_x = 0.1,
     size = 8,
-    fontface = 'bold',
-    family = 'Source Sans Pro'
+    fontface = "bold",
+    family = "Source Sans Pro"
   ) +
   annotate(
-    'text',
+    "text",
    x = seq(2016, 2022, 2),
     y = 0.5,
     label = seq(2016, 2022, 2),
     hjust = 0.5,
     vjust = 1,
     size = 6.5,
-    fontface = 'bold',
+    fontface = "bold",
     color = description_color,
-    family = 'Source Sans Pro'
+    family = "Source Sans Pro"
   ) +
   scale_color_manual(values = color_palette) +
-  coord_cartesian(xlim = c(2014.5, 2022.5), ylim = c(6.5, 0.25), expand = FALSE) +
-  theme_void(base_size = 24, base_family = 'Source Sans Pro') +
+  coord_cartesian(
+    xlim = c(2014.5, 2022.5), ylim = c(10.5, 0.25), expand = FALSE) +
+  theme_void(base_size = 24, base_family = "Source Sans Pro") +
   theme(
-    legend.position = 'none',
-    plot.background = element_rect(fill = 'grey95', color = NA),
-    #plot.margin = margin(t = 2, l = 5, unit = 'mm'),
+    legend.position = "none",
+    plot.background = element_rect(fill = "grey95", color = NA),
+    #plot.margin = margin(t = 2, l = 5, unit = 'mm'), # nolint
     text = element_text(color = description_color),
     plot.title = element_text(
-      face = 'bold', 
-      family = 'Merriweather', 
-      #size = rel(1.3)
+      face = "bold",
+      family = "Merriweather",
+      #size = rel(1.3) # nolint
     )
   ) +
   labs(
     title = "Rank estadual do efetivo bovino",
-    subtitle = "Ranking por número de cabeças entre 2016 a 2022",
+    subtitle = "Comportamento por número de cabeças entre 2016 a 2022",
     caption = "By Ítalo Monteiro
     Fonte: IBGE (2023)"
   )
-rank_rebanho
-ggsave("C:/Users/italo/Downloads/rank_rebanho.png", plot = rank_rebanho, dpi = 300)
+rank_rebanho_bovino
+```
+
+
+```{r}
+ggsave("Image/rank_rebanho_bovino.png", plot = rank_rebanho_bovino, dpi = 300)
 ```
