@@ -1,0 +1,200 @@
+---
+title: "Distribuição espacial e quantitativo do rebanho bovino por UFs "
+description: "Rebanho brasileiro em 2022"
+author: 
+    - name: "Ítalo Marques-Monteiro"
+    - email: "italo.marques.monteiro@outlook.com"
+    - github: https://github.com/italomarquesmonteiro
+    - kaggle: https://www.kaggle.com/talomarquesmonteiro
+    - linkedin: linkedin.com/in/ítalo-monteiro-0b2516144
+    - lattes: http://lattes.cnpq.br/7174985368517137
+    - orcid_id: https://orcid.org/0000-0003-4367-1034
+    - affiliation: Smart Data  
+        
+date: "2023-09-27"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+reb <- sidrar::get_sidra(
+    api = "/t/3939/n6/all/v/all/p/last%201/c79/2670,2672,2675,2677,2680,2681,32793,32794") |>
+    janitor::clean_names("snake") |>
+    dplyr::glimpse()
+```
+
+```{r}
+reb <- reb |>
+    dplyr::select(
+        municipio_codigo, municipio, tipo_de_rebanho, valor) |>
+    tidyr::separate(
+        col = municipio, into = c(
+            "municipio", "abbrev_state"), sep = " - ") |>
+    dplyr::glimpse()
+```
+
+```{r}
+reb <- reb |>
+    dplyr::rename(code_muni = municipio_codigo) |>
+    dplyr::mutate(code_muni = as.double(code_muni)) |>
+    dplyr::glimpse()
+```
+
+
+```{r}
+ranking <- reb |>
+    dplyr::filter(tipo_de_rebanho == "Bovino") |>
+    dplyr::group_by(abbrev_state) |>
+    dplyr::summarize(
+        total_uf = sum(valor, na.rm = TRUE),
+            perc = total_uf / 234352649 * 100
+        ) |>
+    dplyr::arrange(desc(perc))
+
+ranking_muni <- ranking |>
+    dplyr::mutate(
+        color = case_when(
+            row_number() == 1 ~  "#35636A", # MT
+            row_number() == 2 ~  "#577955", # PA
+            row_number() == 3 ~  "#597A55", # GO
+            row_number() == 4 ~  "#617F50", # MG
+            row_number() == 5 ~  "#7B913E", # MS
+            row_number() == 6 ~  "#80943C", # RO
+            row_number() == 7 ~  "#A6A233", # BA
+            row_number() == 8 ~  "#AAA333", # RS
+            row_number() == 9 ~  "#B1A739", # SP
+            row_number() == 10 ~ "#B3A83C", # TO
+            row_number() == 11 ~ "#BDAF48", # MA
+            row_number() == 12 ~ "#CAB957", # PR
+            row_number() == 13 ~ "#E2CD80", # AC
+            row_number() == 14 ~ "#E3CE81", # SC
+            row_number() == 15 ~ "#EEDA9A", # RJ
+            row_number() == 16 ~ "#EFDB9B", # CE
+            row_number() == 17 ~ "#f0dba3", #PE
+            row_number() == 18 ~ "#f1dca3", # ES
+            row_number() == 19 ~ "#f5e0ab", # AM
+            row_number() == 20 ~ "#f6e1ae", # PI
+            row_number() == 21 ~ "#f6e1ae", # PB
+            row_number() == 22 ~ "#f6e2af", # AL
+            row_number() == 23 ~ "#f8e3b1", # RR
+            row_number() == 24 ~ "#f8e3b1", # SE
+            row_number() == 25 ~ "#f8e3b1", # RN
+            row_number() == 26 ~ "#feeabf", # DF
+            row_number() == 27 ~ "#feeabf", # AP
+          TRUE ~ "gray70"
+        ),
+         name = glue::glue("<i style='color:{color}'>{abbrev_state}</i>"))
+
+ranking_muni |>
+    ggplot2::ggplot(
+        aes(x = perc, y = reorder(abbrev_state, perc))) +
+    geom_col(aes(fill = color, color = "white")) +
+    theme_void() +
+    labs(
+        title = "**Ranking maiores efetivos bovino**",
+        subtitle = "*Ranking por UFs*",
+        caption = "") +
+    theme(
+        plot.title = ggtext::element_markdown(face = "bold", family = "Fira Sans", size = 25, hjust = 0.1), # nolint
+        plot.subtitle = ggtext::element_markdown(face = "bold", family = "Fira Sans", size = 15, color = "gray50", hjust = 0.1), # nolint
+        plot.caption = ggtext::element_markdown(face = "bold", family = "Fira Sans", size = 10, color = "gray50"), # nolint
+        #axis.title.x = ggtext::element_markdown(face = "bold", family = "Fira Sans", hjust = 0, vjust = -0.5, size =15), # nolint
+        axis.text.y = ggtext::element_markdown(face = "bold", family = "Fira Sans",size = 15, hjust = 1), # nolint
+        #axis.text.x = ggtext::element_markdown(face = "bold", family = "sand",size =15, hjust = 1), # nolint
+        plot.margin = margin(rep(15, 4)),
+        panel.background = element_blank(),
+        plot.background = element_blank()) +
+    scale_fill_identity(guide = "none") +
+    scale_color_identity(guide = "none") -> rank_muni_reb
+ggsave("Image/rank_muni_reb.png", plot = rank_muni_reb, dpi = 300)                                           
+``` 
+
+
+```{r}
+perc_uf  <- reb |>
+    dplyr::filter(tipo_de_rebanho == "Bovino") |>
+    dplyr::group_by(abbrev_state) |>
+    dplyr::summarize(
+        total_uf = sum(valor, na.rm = TRUE),
+            perc = total_uf / 234352649 *100
+           # perc1 = scales::percent(perc, accuracy = .1, trim = FALSE) # nolint
+        ) |>
+    dplyr::arrange(desc(perc))
+
+perc_uf |> tibble::view()
+
+ufs <- geobr::read_state(code_state = "all", year = 2020)
+#ufs |> dplyr::glimpse()
+
+mapa_ufs  <- ufs |>
+    dplyr::left_join(perc_uf) |>
+    dplyr::glimpse()
+```
+
+```{r}
+bov <- data.frame(image = "C:/Users/italo/Downloads/bovino.png")
+plot_rank_uf <- data.frame(image = "C:/Users/italo/Downloads/rank_muni_reb.png")
+
+perc_mapa_ufs <- mapa_ufs |>
+    ggplot2::ggplot() +
+    geom_sf(aes(fill = perc), alpha = .8) +
+    ggimage::geom_image(aes(x = -45, y = -37, image = image), data = bov,  size = 0.2) + # nolint
+    ggimage::geom_image(aes(x = -64.5, y = -22.8, image = image), data = plot_rank_uf, size = 0.5) + # nolint
+    theme_void() +
+     labs(
+        title = "**Participação das UFs no Efetivo Bovino**",
+        subtitle = "Pesquisa da Pecuaria Municipal (*Resultados 2022*)",
+        caption = "by **Ítalo Monteiro**
+        *Source: IBGE [2023]*",
+        fill = "Percentual (%)") +
+    theme(
+        legend.position = "bottom",
+        legend.title = ggtext::element_markdown(face = "bold", family = "Fira Sans", size = 12,), # nolint
+        plot.title = ggtext::element_markdown(face = "bold", family = "Fira Sans", size = 25, hjust = 0.1), # nolint
+        plot.subtitle = ggtext::element_markdown(face = "bold", family = "Fira Sans", size = 15, color = "gray50", hjust = 0.1), # nolint
+        plot.caption = ggtext::element_markdown(face = "italic", family = "Fira Sans", size = 10, color = "gray50"), # nolint
+        #axis.title.x = ggtext::element_markdown(face = "bold", family = "Fira Sans", hjust = 0, vjust = -0.5, size =15), # nolint
+        plot.margin = margin(rep(15, 4)),
+        panel.background = element_rect(fill = "white", color = "white"),
+        plot.background = element_rect(fill = "white")) +
+    scico::scale_fill_scico(palette = "bamako", direction = -1, limits = c(0, 15)) +# nolint
+    annotate("text", x = -55, y = -13, label = "14,6%", size = 3) + #MT
+    annotate("text", x = -52, y = -4, label = "10,6%", size = 3) + #PA
+    annotate("text", x = -50.04, y = -16.43, label = "10,4%", size = 3) + #GO
+    annotate("text", x = -44, y = -18, label = "9,8%", size = 3) + # MG
+    annotate("text", x = -54, y = -20, label = "7,8%", size = 3) + #MS
+    annotate("text", x = -63, y = -10, label = "7,5%", size = 3) + #RO
+    annotate("text", x = -41, y = -12, label = "5,3%", size = 3) + #BA
+    annotate("text", x = -53.42, y = -29.79, label = "5,1%", size = 3) + #RS
+    annotate("text", x = -48, y = -22, label = "4,7%", size = 3) + #SP
+    annotate("text", x = -48, y = -10, label = "4,5%", size = 3) + #TO
+    annotate("text", x = -45, y = -5, label = "4,0%", size = 3) + #MA
+    annotate("text", x = -51.86, y = -24.75, label = "3,3%", size = 3) + #PR
+    annotate("text", x = -71.79, y = -8.92, label = "1,9%", size = 3) + #AC
+    annotate("text", x = -50.69, y = -27.33, label = "1,9%", size = 3) + #SC
+    annotate("text", x = -42.84, y = -22.47, label = "1,1%", size = 2.5) + #RJ
+    annotate("text", x = -39.60, y = -5.24, label = "1,1%", size = 3) + #CE
+    annotate("text", x = -38.87, y = -8.21, label = "0,9%", size = 2.5) + #PE
+    annotate("text", x = -40.43, y = -18.95, label = "0,9%", size = 2.5) + #ES
+    annotate("text", x = -65.05, y = -3.50, label = "0,6%", size = 3) + #AM
+    annotate("text", x = -43.07, y = -7.97, label = "0.6%", size = 2.5) + #PI
+    annotate("text", x = -36.37, y = -7.20, label = "0,5%", size = 2.5) + #PB
+    annotate("text", x = -36.77, y = -9.75, label = "0,5%", size = 2.5) + #AL
+    annotate("text", x = -61.76, y = 2.42, label = "0,4%", size = 2.5) + #RR
+    annotate("text", x = -37.34, y = -10.49, label = "0.4%", size = 2.5) + #SE
+    annotate("text", x = -36.69, y = -5.70, label = "0,4%", size = 2.5) + #RN
+    annotate("text", x = -47.96, y = -15.71, label = "0,03%", size = 1.5) + #DF
+    annotate("text", x = -51.76, y = 1.39, label = "0,02%", size = 2.5)  #AP
+plot_rebanho_23 <- perc_mapa_ufs +
+    guides(fill = guide_colorbar(
+    direction = "horizontal",
+    title.position = "top",
+        title.hjust = .5,
+        title.vjust = .1,
+            barwidth = 20,
+                 barheight = .5))
+plot_rebanho_23
+ggsave("Image/plot_rebanho_23.png", plot = plot_rebanho_23, dpi = 500) # nolint
+```
