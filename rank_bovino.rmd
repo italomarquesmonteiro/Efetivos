@@ -41,12 +41,12 @@ reb <- reb |>
 
 Rank Bovino
 ```{r}
-reb_bovino <- reb |>
-    dplyr::filter(tipo_de_rebanho == "Bovino") |>
+reb_ovino <- reb |>
+    dplyr::filter(tipo_de_rebanho == "Ovino") |>
     dplyr::glimpse()
 
 
-test_reb <- reb_bovino |>
+test_reb <- reb_ovino |>
     dplyr::summarise(
         rebanho = sum(
             rebanho, na.rm = TRUE), .by = c(
@@ -80,7 +80,7 @@ color_palette <- c(
 names(color_palette) <- todays_top
 description_color <- "grey30"
 
-rank_rebanho_bovino <- estados_selecionados |>
+rank_rebanho_ovino <- estados_selecionados |>
   ggplot(aes(ano, rank, col = estados)) +
   geom_point(shape = "|", stroke = 9) +
   ggbump::geom_bump(linewidth = 2) +
@@ -130,15 +130,15 @@ rank_rebanho_bovino <- estados_selecionados |>
     )
   ) +
   labs(
-    title = "Rank estadual do efetivo bovino",
+    title = "Rank estadual do efetivo ovino",
     subtitle = "Comportamento por número de cabeças entre 2016 a 2022",
     caption = "By Ítalo Monteiro
     Fonte: IBGE (2023)"
   )
-rank_rebanho_bovino
+rank_rebanho_ovino
 ```
 
 
 ```{r}
-ggsave("Image/rank_rebanho_bovino.png", plot = rank_rebanho_bovino, dpi = 300)
+ggsave("Image/rank_rebanho_ovino.png", plot = rank_rebanho_ovino, dpi = 300, width = 17.5)
 ```
