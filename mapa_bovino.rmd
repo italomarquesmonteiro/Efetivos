@@ -20,7 +20,7 @@ library(tidyverse)
 
 ```{r}
 reb <- sidrar::get_sidra(
-    api = "/t/3939/n6/all/v/all/p/last%201/c79/2670,2672,2675,2677,2680,2681,32793,32794") |>
+    api = "/t/3939/n6/all/v/all/p/last%201/c79/2670,2672,2675,2677,2680,2681,32793,32794") |> # nolint
     janitor::clean_names("snake") |>
     dplyr::glimpse()
 ```
@@ -87,7 +87,7 @@ ranking_muni <- ranking |>
         ),
          name = glue::glue("<i style='color:{color}'>{abbrev_state}</i>"))
 
-ranking_muni |>
+rank_muni_reb <-  ranking_muni |>
     ggplot2::ggplot(
         aes(x = perc, y = reorder(abbrev_state, perc))) +
     geom_col(aes(fill = color, color = "white")) +
@@ -107,8 +107,9 @@ ranking_muni |>
         panel.background = element_blank(),
         plot.background = element_blank()) +
     scale_fill_identity(guide = "none") +
-    scale_color_identity(guide = "none") -> rank_muni_reb
-ggsave("Image/rank_muni_reb.png", plot = rank_muni_reb, dpi = 300)                                           
+    scale_color_identity(guide = "none")
+rank_muni_reb
+ggsave("Image/rank_muni_reb.png", plot = rank_muni_reb, dpi = 300)                                            # nolint
 ``` 
 
 
@@ -118,7 +119,7 @@ perc_uf  <- reb |>
     dplyr::group_by(abbrev_state) |>
     dplyr::summarize(
         total_uf = sum(valor, na.rm = TRUE),
-            perc = total_uf / 234352649 *100
+            perc = total_uf / 234352649 * 100
            # perc1 = scales::percent(perc, accuracy = .1, trim = FALSE) # nolint
         ) |>
     dplyr::arrange(desc(perc))
@@ -126,16 +127,17 @@ perc_uf  <- reb |>
 perc_uf |> tibble::view()
 
 ufs <- geobr::read_state(code_state = "all", year = 2020)
-#ufs |> dplyr::glimpse()
+
 
 mapa_ufs  <- ufs |>
     dplyr::left_join(perc_uf) |>
     dplyr::glimpse()
 ```
 
+c:\Users\italo\Downloads\Image Animals
 ```{r}
-bov <- data.frame(image = "C:/Users/italo/Downloads/bovino.png")
-plot_rank_uf <- data.frame(image = "C:/Users/italo/Downloads/rank_muni_reb.png")
+bov <- data.frame(image = "C:/Users/italo/Downloads/Image Animals/bovino.png")
+plot_rank_uf <- data.frame(image = "Image/rank_muni_reb.png")
 
 perc_mapa_ufs <- mapa_ufs |>
     ggplot2::ggplot() +
