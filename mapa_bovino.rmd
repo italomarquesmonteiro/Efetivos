@@ -197,6 +197,7 @@ plot_rebanho_23 <- perc_mapa_ufs +
         title.vjust = .1,
             barwidth = 20,
                  barheight = .5))
+                 
 plot_rebanho_23
 ggsave("Image/plot_rebanho_23.png", plot = plot_rebanho_23, dpi = 500) # nolint
 ```
