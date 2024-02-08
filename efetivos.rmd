@@ -14,7 +14,7 @@ library(tidyverse)
 
 ```{r}
 reb <- sidrar::get_sidra(
-    api = "/t/3939/n6/all/v/all/p/last%201/c79/2670,2672,2675,2677,2680,2681,32793,32794") |>
+    api = "/t/3939/n6/all/v/all/p/last%201/c79/2670,2672,2675,2677,2680,2681,32793,32794") |> # nolint
     janitor::clean_names("snake") |>
     dplyr::glimpse()
 ```
@@ -22,18 +22,14 @@ reb <- sidrar::get_sidra(
 ```{r}
 reb <- reb |>
     dplyr::select(
-        municipio_codigo, municipio, tipo_de_rebanho, valor) |>
+        code_muni = municipio_codigo, municipio, tipo_de_rebanho, valor) |>
     tidyr::separate(
         col = municipio, into = c(
             "municipio", "abbrev_state"), sep = " - ") |>
-    dplyr::glimpse()
-```
-
-```{r}
-reb <- reb |>
     dplyr::mutate(code_muni = as.double(code_muni)) |>
     dplyr::glimpse()
 ```
+
 
 
 dados espaciais 
@@ -45,8 +41,7 @@ muni |> dplyr::glimpse()
 ```{r}
 rebanho <- muni |>
     dplyr::left_join(reb) |>
-    dplyr::glimpse() 
-rebanho |> tibble::view()
+    dplyr::glimpse()
 ```
 
 
@@ -81,9 +76,14 @@ cond_table_bovino <- formattable::formattable(rank_table_bovino,
                             "#1f9e89", "#fde725")),
                                 align = c("c", "c")
     )
-formattable::as.htmlwidget(cond_table_bovino, width = 400)
+widget <- formattable::as.htmlwidget(cond_table_bovino, width = 400)
+htmlwidgets::saveWidget(widget, "table.html")
+
+webshot::webshot("table.html", "boi1.2-table.png", delay = 0, zoom = 8, cliprect = "viewport")
+```
 
 
+```{r}
 bovinos <- rebanho |>
     dplyr::filter(
         abbrev_state == "RS" &
