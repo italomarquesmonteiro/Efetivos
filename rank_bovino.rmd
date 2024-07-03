@@ -41,12 +41,12 @@ reb <- reb |>
 
 Rank Bovino
 ```{r}
-reb_ovino <- reb |>
-    dplyr::filter(tipo_de_rebanho == "Ovino") |>
+reb_bovino <- reb |>
+    dplyr::filter(tipo_de_rebanho == "Bovino") |>
     dplyr::glimpse()
 
 
-test_reb <- reb_ovino |>
+test_reb <- reb_bovino |>
     dplyr::summarise(
         rebanho = sum(
             rebanho, na.rm = TRUE), .by = c(
@@ -64,23 +64,52 @@ todays_top <- estados_rank_by_ano |>
 estados_selecionados <- estados_rank_by_ano |>
     dplyr::filter(estados %in% todays_top)
 
+#color_palette <- c(
+#    "mediumpurple1",
+#    "darkred",
+#    "coral2",
+#    "deeppink",
+#    "gray50",
+#    "#0072B2",
+#    "#009E73",
+#    "goldenrod3",
+#    "#fd001e",
+#    "darkslategray"
+#    )
+
 color_palette <- c(
-    "mediumpurple1",
-    "darkred",
-    "coral2",
-    "deeppink",
-    "gray50",
-    "#0072B2",
-    "#009E73",
-    "goldenrod3",
-    "#fd001e",
-    "darkslategray"
-    )
+    "#042a3b",
+    "#003f5c",
+    "#2f4b7c",
+    "#665191",
+    "#a05195",
+    "#d45087",
+    "#f95d6a",
+    "#ff7c43",
+    "#ffa600",
+    "#c9880f"
+)
+MT
+Pair()
+
+
+color_palette <- c(
+         "#042a3b", #Rondonia
+         "#003f5c", #Para
+         "#2f4b7c", #10
+         "#665191", #Bahia
+         "#c9880f", # Minas
+         "#d45087", #São paulo
+         "#f95d6a", #Rio grande do sul
+         "#ff7c43", # mato grosso do sul
+         "#ffa600", # Mato Grosso
+         "#a05195"  #Goias
+)
 
 names(color_palette) <- todays_top
-description_color <- "grey30"
+description_color <- "grey80"
 
-rank_rebanho_ovino <- estados_selecionados |>
+rank_rebanho_bovino <- estados_selecionados |>
   ggplot(aes(ano, rank, col = estados)) +
   geom_point(shape = "|", stroke = 9) +
   ggbump::geom_bump(linewidth = 2) +
@@ -120,7 +149,7 @@ rank_rebanho_ovino <- estados_selecionados |>
   theme_void(base_size = 24, base_family = "Source Sans Pro") +
   theme(
     legend.position = "none",
-    plot.background = element_rect(fill = "grey95", color = NA),
+    plot.background = element_rect(fill = "grey25", color = NA),
     #plot.margin = margin(t = 2, l = 5, unit = 'mm'), # nolint
     text = element_text(color = description_color),
     plot.title = element_text(
@@ -135,10 +164,10 @@ rank_rebanho_ovino <- estados_selecionados |>
     caption = "By Ítalo Monteiro
     Fonte: IBGE (2023)"
   )
-rank_rebanho_ovino
+rank_rebanho_bovino
 ```
 
 
 ```{r}
-ggsave("Image/rank_rebanho_ovino.png", plot = rank_rebanho_ovino, dpi = 300, width = 17.5)
+ggsave("Image/rank_rebanho_ovino.png", plot = rank_rebanho_bovino, dpi = 300, width = 17.5)
 ```
