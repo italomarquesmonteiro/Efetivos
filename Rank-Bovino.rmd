@@ -1,0 +1,241 @@
+---
+title: "Rank anual do rebanho brasileiro "
+description: "Rebanho brasileiro (2016 - 2022)"
+author: 
+    - name: "Ítalo Marques-Monteiro"
+    - email: "italo.marques.monteiro@outlook.com"
+    - github: https://github.com/italomarquesmonteiro
+    - kaggle: https://www.kaggle.com/talomarquesmonteiro
+    - linkedin: linkedin.com/in/ítalo-monteiro-0b2516144
+    - lattes: http://lattes.cnpq.br/7174985368517137
+    - orcid_id: https://orcid.org/0000-0003-4367-1034
+    - affiliation: Smart Data  
+        
+date: "2023-09-28"
+output: html_document
+---
+```{r}
+library(tidyverse)
+```
+
+```{r}
+reb <- sidrar::get_sidra(api = "/t/3939/n3/all/u/y/v/all/p/last%207/c79/all") |>
+  janitor::clean_names("snake") |>
+  tibble::as_tibble() |>
+  dplyr::mutate(ano = as.double(ano)) |>
+  dplyr::glimpse()
+```
+
+
+```{r}
+reb <- reb |>
+  dplyr::select(
+    ano, rebanho = valor,
+    estados = unidade_da_federacao,
+    tipo_de_rebanho
+  ) |>
+  dplyr::glimpse()
+```
+
+
+Rank Bovino
+```{r}
+reb_bovino <- reb |>
+  dplyr::filter(tipo_de_rebanho == "Bovino") |>
+  dplyr::mutate(
+    estados = case_when(
+      estados == "Rondônia" ~ "RO",
+      estados == "Acre" ~ "AC",
+      estados == "Amazonas" ~ "AM",
+      estados == "Roraima" ~ "RO",
+      estados == "Pará" ~ "PA",
+      estados == "Amapá" ~ "AP",
+      estados == "Tocantins" ~ "TO",
+      estados == "Maranhão" ~ "MA",
+      estados == "Piauí" ~ "PI",
+      estados == "Ceará" ~ "CE",
+      estados == "Rio Grande do Norte" ~ "RN",
+      estados == "Paraíba" ~ "PB",
+      estados == "Pernambuco" ~ "PE",
+      estados == "Alagoas" ~ "AL",
+      estados == "Sergipe" ~ "SE",
+      estados == "Bahia" ~ "BA",
+      estados == "Minas Gerais" ~ "MG",
+      estados == "Espírito Santo" ~ "ES",
+      estados == "Rio de Janeiro" ~ "RJ",
+      estados == "Guanabara" ~ "GU",
+      estados == "São Paulo" ~ "SP",
+      estados == "Paraná" ~ "PR",
+      estados == "Santa Catarina" ~ "SC",
+      estados == "Rio Grande do Sul" ~ "RS",
+      estados == "Mato Grosso do Sul" ~ "MS",
+      estados == "Mato Grosso" ~ "MT",
+      estados == "Goiás" ~ "GO",
+      estados == "Distrito Federal" ~ "DF"
+    )
+  ) |>
+  dplyr::glimpse()
+
+test_reb <- reb_bovino |>
+  dplyr::summarise(rebanho = sum(rebanho, na.rm = TRUE), .by = c(ano, estados))
+
+estados_rank_by_ano <- test_reb |>
+  dplyr::mutate(rank = row_number(desc(rebanho)), .by = ano)
+
+max_rank <- 10
+
+todays_top <- estados_rank_by_ano |>
+  dplyr::filter(ano == 2022, rank <= max_rank) |>
+  dplyr::pull(estados)
+
+estados_selecionados <- estados_rank_by_ano |>
+  dplyr::filter(estados %in% todays_top)
+```
+
+
+paleta de cores
+```{r}
+#color_palette <- c(
+#    "mediumpurple1",
+#    "darkred",
+#    "coral2",
+#    "deeppink",
+#    "gray50",
+#    "#0072B2",
+#    "#009E73",
+#    "goldenrod3",
+#    "#fd001e",
+#    "darkslategray"
+#    )
+
+color_palette <- c(
+  "#a05195", # Rondonia
+  "#d45087", # Para
+  "#042a3b", # 10
+  "#003f5c", # Bahia
+  "#c9880f", # Minas
+  "#2f4b7c", # São paulo
+  "#665191", # Rio grande do sul
+  "#f95d6a", # mato grosso do sul
+  "#ffa600", # Mato Grosso
+  "#ff7c43" # Goias
+)
+names(color_palette) <- todays_top
+description_color <- "grey80"
+```
+
+
+```{r}
+font <- "Josefin Sans"
+font2 <- "Open Sans"
+sysfonts::font_add_google(family = font, font, db_cache = FALSE)
+sysfonts::font_add_google(family = font2, font2, db_cache = FALSE)
+sysfonts::font_add(family = "Font Awesome 6 Brands", regular = "C:/Users/italo/AppData/Local/Microsoft/Windows/Fonts/Font Awesome 6 Brands-Regular-400.otf")
+showtext::showtext_opts(dpi = 300)
+showtext::showtext_auto(enable = TRUE)
+
+github_icon <- "&#xf09b"
+linkedin_icon <- "&#xf0e1"
+x_icon <- "&#xf099"
+instagram_icon <- "&#xf16d"
+github_username <- "italomarquesmonteiro"
+linkedin_username <- "italomarquesmonteiro"
+x_username <- "italommonteiro"
+instagram_username <- "italo.m.m"
+
+bg <- "white"
+txt_col <- "grey70"
+colors <- "gray40"
+title_text <- glue::glue("Efetivo Bovino")
+subtitle_text <- glue::glue("Ranking dos estados brasileiros com os dez maiores efetivo bovino entre 2016 e 2022")
+caption_text <- glue::glue(
+  "**Dados:** IBGE [Pesquisa da Pecuária Municipal(2024)]<br>", # nolint
+    "**Nota:** Tocantins ocupa 10ª colocação desde 2020<br>",
+  "**Plot:** Ítalo Marques-Monteiro <br><br>",
+  "<span style='font-family:\"Font Awesome 6 Brands\"; color: white;'>{github_icon};</span> 
+  <span style='color: grey70'>{github_username}</span><br>",
+  "<span style='font-family:\"Font Awesome 6 Brands\"; color: skyblue;'>{linkedin_icon};</span> 
+  <span style='color: grey70'>{linkedin_username}</span><br>",
+  "<span style='font-family:\"Font Awesome 6 Brands\"; color: steelblue;'>{x_icon};</span>
+  <span style='color: grey70'>{x_username}</span><br>",
+  "<span style='font-family:\"Font Awesome 6 Brands\"; color: red;'>{instagram_icon};</span>
+  <span style='color: grey70'>{instagram_username}</span>"
+)
+```
+
+```{r}
+rank_rebanho_bovino <- estados_selecionados |>
+  ggplot(aes(ano, rank, col = estados)) +
+  geom_point(shape = "|", stroke = 9) +
+  ggbump::geom_bump(linewidth = 6) +
+  geom_text(
+    data = estados_selecionados |> filter(ano == 2016),
+    aes(label = estados),
+    hjust = 1,
+    nudge_x = -0.1,
+    size = 8,
+    fontface = "bold",
+    family = font
+  ) +
+  geom_text(
+    data = estados_selecionados |> filter(ano == 2022),
+    aes(label = rank),
+    hjust = 0,
+    nudge_x = 0.1,
+    size = 8,
+    fontface = "bold",
+    family = font2
+  ) +
+  annotate(
+    "text",
+   x = seq(2016, 2022, 2),
+    y = 0.5,
+    label = seq(2016, 2022, 2),
+    hjust = 0.5,
+    vjust = 1,
+    size = 6.5,
+    fontface = "bold",
+    color = description_color,
+    family = font
+  ) +
+  scale_color_manual(values = color_palette) +
+  coord_cartesian(
+    xlim = c(2014.5, 2022.5), ylim = c(10.5, 0.25), expand = FALSE) +
+  theme_void(base_size = 24, base_family = font) +
+  labs(
+    title = title_text,
+    subtitle = subtitle_text,
+    caption = caption_text
+  ) +
+    theme(
+      legend.position = "none",
+      plot.title = ggtext::element_markdown(face = "bold", family = font, size = 40, color = "gray80", hjust = 0.1),
+      plot.subtitle = element_text(face = "italic", family = font2, size = 18, color = "gray70", hjust = 0.1),
+      plot.caption = ggtext::element_markdown(face = "bold", family = font, size = 9, color = txt_col, hjust = 0, margin = margin(10, 20, 20, 20),  lineheight = 1.2),
+      panel.background = element_rect(fill = "grey25", color = "grey25"),
+      plot.background = element_rect(fill = "grey25")
+    )
+rank_rebanho_bovino
+```
+
+```{r}
+estados_selecionados |> #print(n = 70) #
+  dplyr::filter(estados == "TO") #|> dplyr::arrange(rank)
+
+MT <- ((34246313-30296096)/30296096)*100
+PA <- ((24791060-20476783)/20476783)*100
+GO <- ((24410182-22919070)/22919070)*100
+MG <- ((22993105-23637803)/23637803)*100
+RO <- ((18821727-14463077)/14463077)*100
+MG <- ((-)/)*100
+MG <- ((-)/)*100
+MG <- ((-)/)*100
+MG <- ((-)/)*100
+TO <- ((/)/)*100 # Variação/ PA
+
+((24791060-20628651)/20628651)*100
+```
+
+```{r}
+ggsave(".github\\.vscode\\Image\\rank_rebanho_bovino.png", plot = rank_rebanho_bovino, dpi = 300)
+```
