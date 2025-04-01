@@ -196,7 +196,7 @@ axes[1].set_yticks([])
 axes[1].set_yticklabels([])
 
 # Ajustando a posição do figtext
-plt.figtext(0, 0, "Dados: IBGE (2025) | Elaboração: @italo.m.m", ha="left", fontsize=10, color="gray", fontname="Fira Code")
+plt.figtext(0, 0, "Dados: IBGE (2025) | Elaboração: @italo.m.m", ha="left", fontsize=10, color="black", fontname="Fira Code")
 
 # Ajuste do layout para evitar sobreposição
 plt.tight_layout()
