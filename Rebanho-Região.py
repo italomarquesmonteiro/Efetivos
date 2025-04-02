@@ -107,35 +107,78 @@ plt.figtext(0.5, 0.01, "Dados: IBGE (2025) | Elaboração: @italo.m.m",
 # Exibir o gráfico
 plt.show()
 
-
-# Exibir o gráfico interativo
-fig.show()
-
-
+###############################################################################################################################3
 import plotly.express as px
+import plotly.graph_objects as go
+import seaborn as sns
 import webbrowser
 
-# Criando o gráfico interativo com Plotly
+# Criar gráfico interativo
 fig = px.line(
-    df_selecionado, 
-    x="Ano", 
-    y=df_selecionado["Valor"] / 1_000_000, 
-    color="Região", 
-    markers=True, 
-    title="Efetivo Bovino por Ano e Região (em milhões)",
-    labels={"Ano": "Ano", "y": "Número de Cabeças (Milhões)", "Região": "Região"},
-    template="plotly_white"
+    df_selecionado,
+    x="Ano",
+    y=df_selecionado["Valor"] / 1_000_000,
+    color="Região",
+    markers=True,
+    title="Efetivo Bovino por Ano e Região (em milhões)"
+)
+
+# Aplicar a paleta inferno
+inferno_colors = sns.color_palette("inferno", n_colors=len(df_selecionado["Região"].unique())).as_hex()
+
+# Atualizar cores das linhas
+for i, trace in enumerate(fig.data):
+    trace.update(line=dict(color=inferno_colors[i % len(inferno_colors)]))
+
+# Personalização do layout
+fig.update_layout(
+    title=dict(
+        text="Efetivo Bovino por Ano e Região (em milhões)<br><sup>Dados: IBGE | Elaboração: @italo.m.m</sup>",
+        font=dict(size=26, family="Josefin Sans", color="#b3b3b3")
+    ),
+    xaxis=dict(
+        title="Ano",
+        titlefont=dict(size=22, family="Josefin Sans", color="#b3b3b3"),
+        tickfont=dict(size=16, family="Josefin Sans", color="#b3b3b3"),
+        showgrid=True,
+        gridcolor="rgba(255,255,255,0.3)",
+        gridwidth=1,
+        griddash="dot",
+        zeroline=True,
+        zerolinewidth=1,
+        zerolinecolor="rgba(255,255,255,0.5)"
+    ),
+    yaxis=dict(
+        title="Número de Cabeças (Milhões)",
+        titlefont=dict(size=22, family="Josefin Sans", color="#b3b3b3"),
+        tickfont=dict(size=16, family="Josefin Sans", color="#b3b3b3"),
+        showgrid=True,
+        gridcolor="rgba(255,255,255,0.3)",
+        gridwidth=1,
+        griddash="dot",
+        zeroline=True,
+        zerolinewidth=1,
+        zerolinecolor="rgba(255,255,255,0.5)"
+    ),
+    legend=dict(
+        font=dict(size=16, family="Josefin Sans", color="#b3b3b3")
+    ),
+    plot_bgcolor="#505050",
+    paper_bgcolor="#505050"
 )
 
 # Salvar o gráfico como um arquivo HTML
-file_path = ".vscode\\Image\\grafico_interativo.html"
-fig.write_html(file_path)
+fig.write_html(".vscode\\Image\\grafico_interativo.html")
 
 # Abrir no Google Chrome
-webbrowser.get("chrome").open(file_path)
+#webbrowser.get("chrome").open(file_path)
+
+# Exibir o gráfico
+fig.show()
 
 
 
+##########################################################################################################################
 
 import pandas as pd
 import matplotlib.pyplot as plt
